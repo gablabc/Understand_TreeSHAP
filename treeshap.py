@@ -35,7 +35,7 @@ def custom_treeshap(model, foreground, background):
 
     ####### Wrap C / Python #######
 
-    # Find the shared library, the path depends on the platform and Python version
+    # Find the shared library, the path depends on the platform and Python version    
     libfile = glob.glob('build/*/treeshap*.so')[0]
 
     # Open the shared library

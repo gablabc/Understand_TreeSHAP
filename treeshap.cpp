@@ -5,7 +5,9 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
-#include <iomanip> 
+#include <iomanip>
+
+#include "progressbar.hpp"
 
 using namespace std;
 template <typename T>
@@ -166,7 +168,7 @@ int recurse_2(int n,
             for (int j(0); j < n_features; j++){
                 // Diagonal element
                 if (i == j) {
-                    // i in S_Z and S_A is empty
+                    // i in S_Z and S_X is empty
                     if (in_SZ[i] && (in_SX[n_features] == 0) ){
                         phi[i * n_features + i] -= value[n];
                     }
@@ -260,6 +262,7 @@ Matrix<double> treeSHAP(Matrix<double> &X_f,
 
     // Initialize the SHAP values to zero
     Matrix<double> phi_f_b(size_foreground, vector<double> (n_features, 0));
+    progressbar bar(size_foreground);
     // Iterate over all foreground instances
     for (int i(0); i < size_foreground; i++){
         // Iterate over all background instances
@@ -285,6 +288,7 @@ Matrix<double> treeSHAP(Matrix<double> &X_f,
         for (int f(0); f < n_features; f++){
             phi_f_b[i][f] /= size_background;
         }
+        bar.update();
     }
     return phi_f_b;
 }
@@ -310,6 +314,7 @@ vector<Matrix<double>> taylor_treeSHAP(Matrix<double> &X_f,
     // Initialize the taylor SHAP values to zero
     vector<Matrix<double>> phi_f_b(size_foreground, Matrix<double> (n_features, vector<double> (n_features, 0)));
 
+    progressbar bar(size_foreground);
     // Iterate over all foreground instances
     for (int i(0); i < size_foreground; i++){
         // Iterate over all background instances
@@ -333,6 +338,7 @@ vector<Matrix<double>> taylor_treeSHAP(Matrix<double> &X_f,
                 }
             }
         }
+        bar.update();
     }
     // Rescale taylor SHAP values w.r.t the number of background instances
     for (int i(0); i < size_foreground; i++){
@@ -373,7 +379,8 @@ int main_treeshap(int Nx, int Nz, int Nt, int d, int depth, double* foreground, 
 
     Matrix<double> phi = treeSHAP(X_f, X_b, feature, left_child, right_child, 
                                             threshold, value, W);
-    
+    cout << endl;
+
     // Save the results
     for (unsigned int i(0); i < phi.size(); i++){
         for (int j(0); j < d; j++){
